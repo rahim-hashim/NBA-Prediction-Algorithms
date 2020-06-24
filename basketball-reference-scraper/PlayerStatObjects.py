@@ -97,7 +97,7 @@ class BasicStats():
             self.def_rtg = def_rtg
             
 class AdvancedStats():
-     '''
+    '''
     AdvancedStats object contains all advanced statistics 
     (e.g. True Shooting, Win Share, VORP)
     '''
@@ -136,7 +136,7 @@ class AdvancedStats():
         self.vorp = vorp
         
 class ShootingStats():
-     '''
+    '''
     ShootingStats object contains all shooting-specific statistics 
     (e.g. Average Distance, FG % within 3ft, Dunks)
     '''
@@ -179,7 +179,7 @@ class ShootingStats():
         self.fg3_heave = fg3_heave
 
 class PlayByPlayStats():
-     '''
+    '''
     PlayByPlayStats object contains all play-by-play statistics 
     (e.g. Plus Minus On/Net, And1s, Drawn Fouls)
     '''
