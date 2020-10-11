@@ -3,7 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 from collections import defaultdict
 from playerScraper import playerDataScraper
-from PlayerStatObjects import Player, BasicStats, AdvancedStats, ShootingStats, PlayByPlayStats
+from PlayerObject import Player
 
 def metaInfoScraper(url, playersHash):
     '''
@@ -79,8 +79,9 @@ def metaInfoScraper(url, playersHash):
         playerObject = Player(allPlayerInfo)
         playersHash[playerName]['meta_info'] = playerObject
         playersHash[playerName]['stats'] = playerHash
-        letterPlayerCounter += 1; allPlayerCounter += 1; playerDataCounter += 20
-    print ('      \'' + url[-1] + '\' Players Captured: ', letterPlayerCounter)
+        letterPlayerCounter += 1; allPlayerCounter += 1
+        break
+    print ('\t  ' + url[-1] + '\' Players Captured: ', letterPlayerCounter)
     return playersHash
 
     

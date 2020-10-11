@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from string import ascii_lowercase
 from collections import defaultdict
 from Regions import stateDict
-from PlayerStatObjects import Player, BasicStats, AdvancedStats, ShootingStats, PlayByPlayStats
 from tableScraper import tableScraper
 
 def playerDataScraper(playerName, playerURL):
@@ -85,9 +84,9 @@ def playerDataScraper(playerName, playerURL):
     'fg_pct', 'fg3_per_g', 'fg3a_per_g', 'fg3_pct', 'fg2_per_g', 'fg2a_per_g', 'fg2_pct', 'efg_pct',\
     'ft_per_g', 'fta_per_g', 'ft_pct', 'orb_per_g', 'drb_per_g', 'trb_per_g', 'ast_per_g', 'stl_per_g',\
     'blk_per_g', 'tov_per_g', 'pf_per_g', 'pts_per_g']
-    playerHash['regular_season']['per_game'] = tableScraper(perGame_allFields, playerName, soup, 'per_game', 'table')
-    playerHash['playoffs']['per_game'] = tableScraper(perGame_allFields, playerName, soup, 'all_playoffs_per_game', 'table')
-    
+    playerHash['regular_season']['per_game'] = tableScraper(perGame_allFields, playerName, soup, 'all_per_game', 'div')
+    playerHash['playoffs']['per_game'] = tableScraper(perGame_allFields, playerName, soup, 'all_playoffs_per_game', 'div')
+
     ## Total
     total_allFields = ['season', 'age', 'team_id', 'lg_id', 'pos', 'g', 'gs', 'mp', 'fg', 'fga',\
     'fg_pct', 'fg3', 'fg3a', 'fg3_pct', 'fg2', 'fg2a', 'fg2_pct', 'efg_pct','ft', 'fta', \
@@ -118,6 +117,13 @@ def playerDataScraper(playerName, playerURL):
     playerHash['regular_season']['advanced'] = tableScraper(advanced_allFields, playerName, soup, 'all_advanced', 'div')
     playerHash['playoffs']['advanced'] = tableScraper(advanced_allFields, playerName, soup, 'all_playoffs_advanced', 'div')
     
+    ## Adjusted Shooting
+    adjusted_shooting_allFields =  ['season', 'age', 'team', 'lg', 'pos', 'g', 'mp', 'fg_pct', 'fg2_pct',\
+    'fg3_pct', 'efg_pct', 'ft_pct', 'ts_pct', 'ft_rate', 'fg3a_rate', 'lg_fg_pct', 'lg_fg2_pct', 'lg_fg3_pct',\
+    'lg_efg_pct', 'lg_ft_pct', 'lg_ts_pct', 'lg_ft_rate', 'lg_fg3a_rate', 'adj_fg_pct', 'adj_fg2_pct',\
+    'adj_fg3_pct', 'adj_efg_pct', 'adj_ft_pct', 'adj_ts_pct', 'adj_ft_rate', 'adj_fg3a_rate', 'fg_pts_added', 'ts_pts_added']
+    playerHash['regular_season']['adj_shooting'] = tableScraper(adjusted_shooting_allFields, playerName, soup, 'all_adj-shooting', 'div')
+    
     ## Shooting
     shooting_allFields =  ['season', 'age', 'team_id', 'lg_id', 'pos', 'g', 'mp', 'fg_pct', 'avg_dist', 'pct_fga_fg2a', 'pct_fga_00_03',\
     'pct_fga_03_10', 'pct_fga_10_16', 'pct_fga_16_xx', 'fg3a_pct_fga', 'fg2_pct', 'fg_pct_00_03', 'fg_pct_03_10',\
@@ -131,5 +137,5 @@ def playerDataScraper(playerName, playerURL):
     'fouls_shooting', 'fouls_offensive', 'drawn_shooting', 'drawn_offensive', 'astd_pts', 'and1s', 'own_shots_blk']
     playerHash['regular_season']['play-by-play'] = tableScraper(play_allFields, playerName, soup, 'all_pbp', 'div')
     playerHash['playoffs']['play-by-play'] = tableScraper(play_allFields, playerName, soup, 'all_playoffs_pbp', 'div')
-    
+
     return metaInfo, playerHash
