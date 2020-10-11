@@ -47,6 +47,8 @@ def tableScraper(allFields, playerName, playerSoup, statType, statTag):
         for index, row in enumerate(rows):
             if index == 0:
                 statFields = re.findall('data-stat="(.*?)"', str(row))
+                if 'DUMMY' in statFields:
+                    statFields = list(filter(lambda x: x != 'DUMMY', statFields)) # removes blank columns labeled as 'DUMMY'
             seasonCol = re.findall('<(.*?)th>', str(row))[0]
             if 'Career' in str(seasonCol):
                 season = ['Career']
@@ -59,6 +61,8 @@ def tableScraper(allFields, playerName, playerSoup, statType, statTag):
                     continue
             row1 = BeautifulSoup(row, 'html.parser')
             dataCols = row1.find_all('td'); data = [ele.text.strip() for ele in dataCols]
+            if 'DUMMY' in dataCols:
+                dataCols = list(filter(lambda x: x != 'DUMMY', dataCols)) # removes blank columns labeled as 'DUMMY'
             statData = season + data
             statData = fieldsCheck(allFields, statFields, statData)
             statData = [playerName] + statData

@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 from string import ascii_lowercase
 from collections import defaultdict
 from Regions import stateDict
-from PlayerStatObjects import Player, BasicStats, AdvancedStats, ShootingStats, PlayByPlayStats
+#from PlayerStatObjects import Player, BasicStats, AdvancedStats, ShootingStats, PlayByPlayStats
 from tableScraper import tableScraper
 
 def playerDataScraper(playerName, playerURL):
@@ -91,7 +91,7 @@ def playerDataScraper(playerName, playerURL):
     ## Total
     total_allFields = ['season', 'age', 'team_id', 'lg_id', 'pos', 'g', 'gs', 'mp', 'fg', 'fga',\
     'fg_pct', 'fg3', 'fg3a', 'fg3_pct', 'fg2', 'fg2a', 'fg2_pct', 'efg_pct','ft', 'fta', \
-    'ft_pct', 'orb', 'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 'pts'] # not including 'trp_dbl' for now...
+    'ft_pct', 'orb', 'drb', 'trb', 'ast', 'stl', 'blk', 'tov', 'pf', 'pts']
     playerHash['regular_season']['total'] = tableScraper(total_allFields, playerName, soup, 'all_totals', 'div')
     playerHash['playoffs']['total'] = tableScraper(total_allFields, playerName, soup, 'all_playoffs_totals', 'div')
     
@@ -119,7 +119,7 @@ def playerDataScraper(playerName, playerURL):
     playerHash['playoffs']['advanced'] = tableScraper(advanced_allFields, playerName, soup, 'all_playoffs_advanced', 'div')
     
     ## Shooting
-    shooting_allFields =  ['season', 'age', 'team_id', 'lg_id', 'pos', 'g', 'mp', 'fg_pct', 'avg_dist', 'pct_fga_fg2a', 'pct_fga_00_03',\
+    shooting_allFields =  ['season', 'age', 'team_id', 'lg_id', 'pos', 'g', 'mp', 'fg_pct', 'avg_dist', 'fg2a_pct_fga', 'pct_fga_00_03',\
     'pct_fga_03_10', 'pct_fga_10_16', 'pct_fga_16_xx', 'fg3a_pct_fga', 'fg2_pct', 'fg_pct_00_03', 'fg_pct_03_10',\
     'fg_pct_10_16', 'fg_pct_16_xx', 'fg3_pct', 'fg2_pct_ast', 'pct_fg2_dunk', 'fg2_dunk', 'fg3_pct_ast', 'pct_fg3a_corner', 'fg3_pct_corner', 'fg3a_heave', 'fg3_heave']
     playerHash['regular_season']['shooting'] = tableScraper(shooting_allFields, playerName, soup, 'all_shooting', 'div')
