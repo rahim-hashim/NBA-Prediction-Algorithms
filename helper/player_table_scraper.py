@@ -3,7 +3,7 @@ import os
 import sys
 import time
 import pandas as pd
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Comment
 from string import ascii_lowercase
 from collections import defaultdict
 
@@ -14,6 +14,8 @@ def player_table_scraper(playerName, playerSoup):
   page, the location of the data is the same, with the only key differences being 
   the tables tag (statTag) and column names for each (statType).
   '''
+  #with open('soup.txt', mode='wt') as file:
+  #  file.write(str(playerSoup))
   statHashList = []
   for caption in playerSoup.find_all('caption'):
     table = caption.find_parent('table')
@@ -41,7 +43,17 @@ def player_table_scraper(playerName, playerSoup):
           else:
             continue # team-specific stats
           dataCols = row1.find_all('td')
-          data = [ele.text.strip() for ele in dataCols]
+          data = []
+          for dataVal in dataCols:
+            ele = dataVal.text.strip()
+            if ele.isnumeric():
+              if re.search(r'\.',ele): # float
+                ele = float(ele)
+              else: # int
+                ele = int(ele)
+            data.append(ele)
+          # data = [ele.text.strip() for ele in dataCols]
+          # data_converted = [float(x) if re.search(r'\.',x) else int(x) for x in data] # to convert str to int/float
           if len(data) < 5:
             continue # row has mostly empty data
           statData = [playerName] + season + data

@@ -3,8 +3,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from collections import defaultdict
-from PlayerObject import Player
-from player_info_scraper import player_info_scraper
+from helper.player_info_scraper import player_info_scraper
 
 def meta_info_scraper(url, list_players_meta, list_players_data):
   meta_hash = defaultdict(list)
@@ -71,13 +70,14 @@ def meta_info_scraper(url, list_players_meta, list_players_data):
     #playerOverview = playerName, draftYear, retireYear, height, weight, birthDate, colleges, playerURL
     
     '''Running playerDataScraper to capture playerData'''
-    player_meta_info, df_player = player_info_scraper(player_name, playerURL)
+    df_meta, df_player_data = player_info_scraper(player_name, playerURL)
     
     '''Creating Player object and inserting to playerHash'''
     #allPlayerInfo = playerOverview + player_meta_info
     df_player_meta = pd.DataFrame.from_dict(meta_hash)
-    list_players_meta.append(df_player_meta)
-    list_players_data.append(df_player)
+    df_meta_all = pd.concat([df_player_meta, df_meta], axis=1)
+    list_players_meta.append(df_meta_all)
+    list_players_data.append(df_player_data)
     letterPlayerCounter += 1; allPlayerCounter += 1
   print ('\t  ' + url[-1] + '\' Players Captured: ', letterPlayerCounter)
   return list_players_meta, list_players_data

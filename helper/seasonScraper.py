@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from collections import defaultdict
-from tableScraper import tableScraper
+from player_table_scraper import player_table_scraper
 
 #from gameLogScraper import gameDataScraper
 
