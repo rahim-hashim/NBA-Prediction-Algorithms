@@ -108,18 +108,20 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
   # Return Players DataFrame   
   return df_players_meta, df_players_data
 
-def scrape_single_player():
+def single_player_scraper(player_name = None):
   '''
-  scrape_single_player scrapes a single, raw inputted player
+  single_player_scraper scrapes a single, raw inputted player
     - meta information
       i.e. https://www.basketball-reference.com/players/
     - season and playoff information
       i.e. https://www.basketball-reference.com/players/b/bryanko01.html
   '''
-  player_name = input('Player Name: ')
+  if player_name == None:
+    player_name = input('Player Name: ')
+
   last_name_letter = player_name.split()[1][0]
   letter_url = PLAYERS_ROOT_URL + last_name_letter.lower()
-  print('Searching for name in: {}'.format(letter_url))
+  print('Searching for name in: {}'.format(letter_url)) # organized by last name letter
   letter_response = requests.get(letter_url)
   letter_soup = BeautifulSoup(letter_response.text, 'html.parser')
   playerTableAll = letter_soup.find_all('tr')
