@@ -21,6 +21,7 @@ PLAYER_META_PICKLE = 'players_df_meta.pkl'
 PLAYER_DATA_PICKLE = 'players_df_data.pkl'
 
 def sizeof_fmt(num):
+  '''Calculates size of pickled files'''
   for unit in [' ','KB','MB','GB','TB','PB','EB','ZB']:
     if abs(num) < 1024.0:
       return '%3.1f%s' % (num, unit)
@@ -29,13 +30,21 @@ def sizeof_fmt(num):
 
 # Thread flag decides whether you want to use parallel processing or standard
 def scrape_all_players(ROOT, THREAD_FLAG=True):
-  '''
-  scrape_player_data pulls all the player data, which includes:
+  '''Scrapes all basketball-reference player data, which includes:
     - meta information
       i.e. https://www.basketball-reference.com/players/
     - season and playoff information
       i.e. https://www.basketball-reference.com/players/b/bryanko01.html
+
+    Args:
+      ROOT: website root
+      THREAD_FLAG: boolean for threading
+
+    Returns:
+      df_players_meta: meta-info on all players in database
+      df_players_data: statistics on all players in database
   '''
+
   SAVE_PATH = ROOT + 'data/'
   # Search for data folder
   if not os.path.exists(SAVE_PATH):
@@ -79,16 +88,21 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
       for thread in threads:
         thread.join() # makes sure that the main program waits until all threads have terminated
     end_time = time.time()
+    print ('  Scraping complete')
     print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
     
     # Concatenate all meta info and player data into two DataFrames
     print ('  Concatenating DataFrames')
+    start_time = time.time()
     df_players_meta = None
     df_players_data = None
     for (df_meta, df_data) in tqdm(list(zip(list_players_meta, list_players_data))):
-      df_players_meta = pd.concat([df_players_meta,df_meta])
-      df_players_data = pd.concat([df_players_data,df_data])
+      df_players_meta = pd.concat(df_meta)
+      df_players_data = pd.concat(df_data)
+    end_time = time.time()
     print ('  Concatenating complete')
+    print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
+
 
     print('Saving {}'.format(PLAYER_META_PICKLE))
     print('  Path: {}'.format(SAVE_PATH+PLAYER_META_PICKLE))
@@ -115,6 +129,13 @@ def single_player_scraper(player_name = None):
       i.e. https://www.basketball-reference.com/players/
     - season and playoff information
       i.e. https://www.basketball-reference.com/players/b/bryanko01.html
+
+    Args:
+      player_name: raw input of player for search
+
+    Returns:
+      df_players_meta: meta-info on single player (if exists)
+      df_players_data: statistics on single player (if exists)
   '''
   if player_name == None:
     player_name = input('Player Name: ')

@@ -9,10 +9,16 @@ from helper.Regions import stateDict
 from helper.player_table_scraper import player_table_scraper
 
 def player_info_scraper(playerName, playerURL):
-  '''
-  playerDataScraper scrapes data from each player's specific URL page,
-  which contains additional meta-information (e.g. birth place), while
-  also containing all stat tables
+  '''Scrapes data from each player's specific URL page
+
+  Args:
+    playerName: player's full name
+    playerURL: player's specific URL
+
+  Returns:
+    df_row: df containing meta info on player
+    df_players: df containing statistical data on player
+
   '''
   response = requests.get(playerURL)
   soup = BeautifulSoup(response.text, 'html.parser')

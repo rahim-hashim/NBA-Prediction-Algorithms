@@ -1,12 +1,15 @@
 import re
+import numpy as np
 import pandas as pd
 from bs4 import BeautifulSoup, Comment
 from collections import defaultdict
 
-INCLUDED_TABLES = ['all_salaries'] # for testing
-EXCLUDED_TABLES = ['highs-reg-season', 'sims-thru'] # not included in final DataFrame
+INCLUDED_TABLES = ['pbp'] # for testing
+EXCLUDED_TABLES = ['highs-reg-season', 'sims-thru', 'adjooting'] # not included in final DataFrame
+DOUBLE_HEADER_TABLES = ['pbp', 'shooting'] # tables that have two headers
 
 def data_type_parse(tag_soup):
+  '''Searches for tag id'''
   id_pattern = 'id="([A-Za-z0-9_/\\-]*)'
   reg_result = re.search(id_pattern, str(tag_soup))
   reg_result = reg_result.group(1)
@@ -17,23 +20,30 @@ def row_scraper(playerName, tag_soup, tag, statHashList):
   if tag == 'caption':
     table = tag_soup.find_parent('table') # table is the parent to <caption> tag
     rows = re.findall('<tr(.*?)</tr>', str(table))
-    data_category = table['id']
-    data_category_split = data_category.split('_')
-    data_type = '_'.join(data_category_split[1:]) # remove playoffs_
+    data_type = table['id']
   elif tag == 'comment':
     table = tag_soup.find_all('table') # table is the child to <caption> tag
     rows = re.findall('<tr(.*?)</tr>', str(table))
     data_type = data_type_parse(tag_soup) # finds 'id=____' which is data_type
+  season_playoffs = 'season'
+  if 'playoffs' in data_type:
+    season_playoffs = 'playoffs'
+    data_type = data_type.replace('playoffs_', '') # remove playoffs_
   if rows:
-    if data_type in EXCLUDED_TABLES:
+    if data_type in EXCLUDED_TABLES or data_type == '':# or data_type not in INCLUDED_TABLES:
       return statHashList # exclude tables
     for index, row in enumerate(rows):
       statHash = defaultdict(dict)
       if index == 0: # table header
         statFields = ['player_name'] + re.findall('data-stat="(.*?)"', str(row))
+        if data_type in DOUBLE_HEADER_TABLES:
+          continue
+      elif data_type in DOUBLE_HEADER_TABLES and index == 1:
+        statFields = ['player_name'] + re.findall('data-stat="(.*?)"', str(row))
       else: # table data
         row_soup = BeautifulSoup(row, 'html.parser')
-        season_playoffs = ['playoffs' if 'playoff' in row_soup else 'season']
+        if 'playoffs' in str(row_soup): # second check for playoff data
+          season_playoffs = 'playoffs' 
         seasonCol = row_soup.find('th')
         if seasonCol == None:
           continue # missing data
@@ -65,21 +75,35 @@ def row_scraper(playerName, tag_soup, tag, statHashList):
         df_row = pd.DataFrame.from_dict(statHash)
         df_row.insert(0, 'data_type', data_type)
         df_row.insert(1, 'season_playoffs', season_playoffs)
+        if 'DUMMY' in df_row.columns:
+          df_row = df_row.drop(['DUMMY'], axis=1)
         statHashList.append(df_row)
   else:
     pass
   return statHashList
 
 def player_table_scraper(playerName, playerSoup):
-  '''
-  tableGeneralScraper will be used to scrape all table types to insert into
-  statHash. Given the generalizable nature of the html structure on each player's
+  '''Scrape all table types to insert into pandas DataFrame
+
+  Args:
+    playerName: player's full name
+    playerSoup: player's URL after BeautifulSoup
+
+  Returns:
+    df_players: df containing statistical data on player
+  
+  Given the generalizable nature of the html structure on each player's
   page, the location of the data is the same, with the only key differences being 
   the tables tag (statTag) and column names for each (statType).
   '''
   #with open('soup.txt', mode='wt') as file:
   #  file.write(str(playerSoup))
   statHashList = []
+
+  # pull all links from player page
+  links = playerSoup.find_all('a', href=True)
+  gamelogs = np.unique(np.array([link['href'] for link in links if 'gamelog' in str(link)]))
+  lineups = np.unique(np.array([link['href'] for link in links if 'lineups' in str(link)]))
 
   # Per Game, Totals, Advanced Tables
   for caption_soup in playerSoup.find_all('caption'):

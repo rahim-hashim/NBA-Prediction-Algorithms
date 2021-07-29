@@ -10,7 +10,8 @@ def meta_info_scraper(url, list_players_meta, list_players_data):
   '''
   metaInfoScraper scrapes the meta-data on each player
   '''
-  allPlayerCounter = 0; playerDataCounter = 0
+  allPlayerCounter = 0
+  playerDataCounter = 0
   letterPlayerCounter = 0
   '''
   The API for basketball-reference sorts players by last name first letter 
