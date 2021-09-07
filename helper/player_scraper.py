@@ -139,8 +139,10 @@ def single_player_scraper(player_name = None):
   '''
   if player_name == None:
     player_name = input('Player Name: ')
-
-  last_name_letter = player_name.split()[1][0]
+  try:
+    last_name_letter = player_name.split()[1][0] # first and last name
+  except:
+    last_name_letter = player_name[0][0] # only one name
   letter_url = PLAYERS_ROOT_URL + last_name_letter.lower()
   print('Searching for name in: {}'.format(letter_url)) # organized by last name letter
   letter_response = requests.get(letter_url)

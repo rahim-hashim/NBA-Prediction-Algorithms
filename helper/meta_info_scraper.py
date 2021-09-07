@@ -7,13 +7,21 @@ from helper.player_info_scraper import player_info_scraper
 
 def meta_info_scraper(url, list_players_meta, list_players_data):
   meta_hash = defaultdict(list)
-  '''
-  metaInfoScraper scrapes the meta-data on each player
+  '''Scrapes the meta-data on each player
+
+  Args:
+    url: player table url (i.e. )
+    THREAD_FLAG: boolean for threading
+
+  Returns:
+    df_players_meta: meta-info on all players in database
+    df_players_data: statistics on all players in database
   '''
   allPlayerCounter = 0
   playerDataCounter = 0
   letterPlayerCounter = 0
   '''
+
   The API for basketball-reference sorts players by last name first letter 
   (i.e. Kobe Bryant in https://www.basketball-reference.com/players/b/)
   '''

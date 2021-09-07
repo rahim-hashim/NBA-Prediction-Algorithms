@@ -11,7 +11,7 @@ from string import ascii_lowercase
 from collections import defaultdict
 from itertools import zip_longest
 from TeamNames import teamDict
-from tqdm import trange, tqdm
+from tqdm.notebook import trange, tqdm
 from datetime import datetime
 
 def grouper(iterable, n, fillvalue=None):
@@ -124,9 +124,9 @@ def scrape():
                    'P': ['Playoffs'],
                    'B': ['Regular Season', 'Playoffs']}
                    
-    start_year_input = input('\nInput starting year of season that you want' +  
+    start_year_input = input('\nInput starting year of season that you want ' +  
                         'to start scraping from  (e.g. 2015 if start at 2015): ')
-    end_year_input = input('\nInput ending year of season that you want to' + 
+    end_year_input = input('\nInput ending year of season that you want to ' + 
                         'end scraping at (e.g. 2017 if scraping 2015-2016' + 
                         'and 2016-2017 season')
     try:
