@@ -148,8 +148,9 @@ def scrape():
             team_name = teamDict[team_abbr].lower()
             team_url = url + team_name.replace(" ", "-") + \
                     '/' + str(year) + '-' + str(year+1)
-            add_games, add_meta = bettingLinesScraper(team_url, team_name, 
+            add_games, add_meta = bettingLinesScraper(team_url, team_abbr, 
                                   year, game_types[specs], meta)
+
             games = games + add_games; meta = meta + add_meta
     return games
 
