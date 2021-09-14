@@ -4,7 +4,6 @@ from bs4 import BeautifulSoup
 from string import ascii_lowercase
 from collections import defaultdict
 from Regions import stateDict
-#from PlayerStatObjects import Player, BasicStats, AdvancedStats, ShootingStats, PlayByPlayStats
 from tableScraper import tableScraper
 
 def playerDataScraper(playerName, playerURL):

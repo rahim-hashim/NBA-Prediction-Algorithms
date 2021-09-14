@@ -1,12 +1,15 @@
 import re
 import numpy as np
 import pandas as pd
-from bs4 import BeautifulSoup, Comment
 from collections import defaultdict
+from bs4 import BeautifulSoup, Comment
+from game_log_scraper import game_log_scraper
 
 INCLUDED_TABLES = ['pbp'] # for testing
 EXCLUDED_TABLES = ['highs-reg-season', 'sims-thru', 'adjooting'] # not included in final DataFrame
 DOUBLE_HEADER_TABLES = ['pbp', 'shooting'] # tables that have two headers
+
+WEBSITE_URL = 'https://www.basketball-reference.com'
 
 def data_type_parse(tag_soup):
   '''Searches for tag id'''
@@ -104,6 +107,15 @@ def player_table_scraper(playerName, playerSoup):
   links = playerSoup.find_all('a', href=True)
   gamelogs = np.unique(np.array([link['href'] for link in links if 'gamelog' in str(link)]))
   lineups = np.unique(np.array([link['href'] for link in links if 'lineups' in str(link)]))
+
+  for gamelog in gamelogs:
+    gamelog_url = WEBSITE_URL + gamelog
+    if 'playoffs' in gamelog_url:
+      continue
+    else:
+      gamelog_advanced_url = gamelog_url.replace('gamelog', 'gamelog-advanced')
+    game_log_scraper(gamelog_url)
+    game_log_scraper(gamelog_advanced_url)
 
   # Per Game, Totals, Advanced Tables
   for caption_soup in playerSoup.find_all('caption'):
