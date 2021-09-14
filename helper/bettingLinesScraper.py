@@ -60,7 +60,7 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, meta_list):
 
     # Always have the spread for the Home team, against the spread
     # Do not include Over Under for now
-    keys = ['Date', 'Home_Team', 'Away_Team', 'Home_Score', 'Away_Score' 'OT', 'Spread']
+    keys = ['Date', 'Home_Team', 'Away_Team', 'Home_Score', 'Away_Score', 'Spread']
     NUM_TABLE_ENTRIES = 5
 
     #### NEED TO GET TEAM NAME SOMEHOW
@@ -103,7 +103,6 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, meta_list):
                 home_score, away_score, OT = getScore(entry[2].text.strip(),
                         TEAM_NAME == game['Home_Team'])
                 game['Home_Score'] = home_score; game['Away_Score'] = away_score
-                game['OT'] = OT
 		# Scrape ATS and Spread (Right now, the home team spread will be shown)
                 spread = getSpread(entry[3].text.strip(), TEAM_NAME == game['Home_Team'])
                 game['Spread'] = spread
