@@ -1,6 +1,7 @@
 import re
 import numpy as np
 import pandas as pd
+from IPython.display import display
 from collections import defaultdict
 from bs4 import BeautifulSoup, Comment
 from game_log_scraper import game_log_scraper
@@ -108,14 +109,17 @@ def player_table_scraper(playerName, playerSoup):
   gamelogs = np.unique(np.array([link['href'] for link in links if 'gamelog' in str(link)]))
   lineups = np.unique(np.array([link['href'] for link in links if 'lineups' in str(link)]))
 
+  gamelogs_df = pd.DataFrame()
   for gamelog in gamelogs:
     gamelog_url = WEBSITE_URL + gamelog
     if 'playoffs' in gamelog_url:
       continue
     else:
       gamelog_advanced_url = gamelog_url.replace('gamelog', 'gamelog-advanced')
-    game_log_scraper(gamelog_url)
-    game_log_scraper(gamelog_advanced_url)
+    gamelog_df = game_log_scraper(playerName, gamelog_url)
+    gamelogs_df = pd.concat([gamelogs_df,gamelog_df])
+    #gamelog_adv_df = game_log_scraper(gamelog_advanced_url)
+    #print(gamelog_adv_df)
 
   # Per Game, Totals, Advanced Tables
   for caption_soup in playerSoup.find_all('caption'):
@@ -129,4 +133,4 @@ def player_table_scraper(playerName, playerSoup):
       statHashList = row_scraper(playerName, comment_soup, 'comment', statHashList)
 
   df_player = pd.concat(statHashList, ignore_index=True)
-  return df_player
+  return df_player, gamelogs_df

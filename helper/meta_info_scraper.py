@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup
 from collections import defaultdict
 from helper.player_info_scraper import player_info_scraper
 
-def meta_info_scraper(url, list_players_meta, list_players_data):
+def meta_info_scraper(url, list_players_meta, list_players_data, list_players_gamelogs):
   meta_hash = defaultdict(list)
   '''Scrapes the meta-data on each player
 
@@ -16,6 +16,7 @@ def meta_info_scraper(url, list_players_meta, list_players_data):
   Returns:
     df_players_meta: meta-info on all players in database
     df_players_data: statistics on all players in database
+    df_players_gamelogs: gamelogs for all players in database
   '''
   allPlayerCounter = 0
   playerDataCounter = 0
@@ -79,7 +80,7 @@ def meta_info_scraper(url, list_players_meta, list_players_data):
     #playerOverview = playerName, draftYear, retireYear, height, weight, birthDate, colleges, playerURL
     
     '''Running playerDataScraper to capture playerData'''
-    df_meta, df_player_data = player_info_scraper(player_name, playerURL)
+    df_meta, df_player_data, df_gamelogs = player_info_scraper(player_name, playerURL)
     
     '''Creating Player object and inserting to playerHash'''
     #allPlayerInfo = playerOverview + player_meta_info
@@ -87,8 +88,9 @@ def meta_info_scraper(url, list_players_meta, list_players_data):
     df_meta_all = pd.concat([df_player_meta, df_meta], axis=1)
     list_players_meta.append(df_meta_all)
     list_players_data.append(df_player_data)
+    list_players_gamelogs.append(df_gamelogs)
     letterPlayerCounter += 1; allPlayerCounter += 1
   print ('\t  ' + url[-1] + '\' Players Captured: ', letterPlayerCounter)
-  return list_players_meta, list_players_data
+  return list_players_meta, list_players_data, list_players_gamelogs
 
     

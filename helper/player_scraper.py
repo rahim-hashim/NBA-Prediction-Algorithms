@@ -21,6 +21,7 @@ WEBSITE_URL = 'https://www.basketball-reference.com'
 PLAYERS_ROOT_URL = WEBSITE_URL + '/players/'
 PLAYER_META_PICKLE = 'players_df_meta.pkl'
 PLAYER_DATA_PICKLE = 'players_df_data.pkl'
+PLAYER_GAMELOG_PICKLE = 'players_df_gamelogs.pkl'
 
 def sizeof_fmt(num):
   '''Calculates size of pickled files'''
@@ -52,19 +53,33 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
   if not os.path.exists(SAVE_PATH):
     os.makedirs(SAVE_PATH)
 
-  # Read pickle
-  if PLAYER_META_PICKLE in os.listdir(SAVE_PATH) and PLAYER_DATA_PICKLE in os.listdir(SAVE_PATH): 
-    print('{} and {} already exists'.format(PLAYER_META_PICKLE, PLAYER_DATA_PICKLE))
+  # Read pickle(s)
+  all_pickles = [False,False,False]
+  if PLAYER_META_PICKLE in os.listdir(SAVE_PATH): 
+    print('{} already exists'.format(PLAYER_META_PICKLE))
     print('  Uploading...')
     df_players_meta = pd.read_pickle(SAVE_PATH+PLAYER_META_PICKLE)
+    all_pickles[0] = True
+  if PLAYER_DATA_PICKLE in os.listdir(SAVE_PATH):
+    print('{} already exists'.format(PLAYER_DATA_PICKLE))
+    print('  Uploading...')
     df_players_data = pd.read_pickle(SAVE_PATH+PLAYER_DATA_PICKLE)
+    all_pickles[1] = True
+  if PLAYER_GAMELOG_PICKLE in os.listdir(SAVE_PATH):
+    print('{} already exists'.format(PLAYER_GAMELOG_PICKLE))
+    print('  Uploading...')
+    df_players_gamelogs = pd.read_pickle(SAVE_PATH+PLAYER_GAMELOG_PICKLE)
+    all_pickles[2] = True
   
+  if all(all_pickles):
+    pass
   # Scrape all basketball-reference player data and pickle
   else:
     list_players_meta = []
     list_players_data = []
+    list_players_gamelogs = []
     urls_players = []
-    for letter in ascii_lowercase:
+    for letter in ascii_lowercase[:2]:
         url = PLAYERS_ROOT_URL + letter
         urls_players.append(url)
 
@@ -77,14 +92,14 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     if THREAD_FLAG == False:
       print('  Threading inactivated...')
       for url in urls_players:
-        list_players_meta, list_players_data = meta_info_scraper(url, list_players_meta, list_players_data)
+        list_players_meta, list_players_data, list_players_gamelogs = meta_info_scraper(url, list_players_meta, list_players_data, list_players_gamelogs)
 
     # Parallel-Processing
     else:
       print('  Threading activated...')
       threads = []
       for url in urls_players:
-        thread = threading.Thread(target=meta_info_scraper, args=(url,list_players_meta,list_players_data,))
+        thread = threading.Thread(target=meta_info_scraper, args=(url,list_players_meta,list_players_data,list_players_gamelogs,))
         threads += [thread]
         thread.start()
       for thread in threads:
@@ -98,9 +113,11 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     start_time = time.time()
     df_players_meta = None
     df_players_data = None
-    for (df_meta, df_data) in tqdm(list(zip(list_players_meta, list_players_data))):
-      df_players_meta = pd.concat(df_meta)
-      df_players_data = pd.concat(df_data)
+    df_players_gamelogs = None
+    for (df_meta, df_data, df_log) in tqdm(list(zip(list_players_meta, list_players_data, list_players_gamelogs))):
+      df_players_meta = pd.concat([df_players_meta,df_meta])
+      df_players_data = pd.concat([df_players_data,df_data])
+      df_players_gamelogs = pd.concat([df_players_gamelogs,df_log])
     end_time = time.time()
     print ('  Concatenating complete')
     print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
@@ -116,13 +133,19 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     df_players_data.replace('NaN', np.nan, inplace=True)
     df_players_data.replace('', np.nan, inplace=True)
     df_players_data.to_pickle(SAVE_PATH+PLAYER_DATA_PICKLE)
+    print('Saving {}'.format(PLAYER_GAMELOG_PICKLE))
+    print('  Path: {}'.format(SAVE_PATH+PLAYER_GAMELOG_PICKLE))
+    df_players_gamelogs.replace('NaN', np.nan, inplace=True)
+    df_players_gamelogs.replace('', np.nan, inplace=True)
+    df_players_gamelogs.to_pickle(SAVE_PATH+PLAYER_GAMELOG_PICKLE)
 
   print('  Size (meta info): {}'.format(sizeof_fmt(sys.getsizeof(df_players_meta))))
   print('  Size (player data): {}'.format(sizeof_fmt(sys.getsizeof(df_players_data))))
+  print('  Size (player data): {}'.format(sizeof_fmt(sys.getsizeof(df_players_gamelogs))))
   print('Complete.')
 
   # Return Players DataFrame   
-  return df_players_meta, df_players_data
+  return df_players_meta, df_players_data, df_players_gamelogs
 
 def fuzzy_matching(player_name, playerTable):
   FUZZY_THRESHOLD = 0.8
@@ -169,7 +192,9 @@ def single_player_scraper(player_name = None):
   letter_soup = BeautifulSoup(letter_response.text, 'html.parser')
   playerTableAll = letter_soup.find_all('tr')
   playerTable = iter(playerTableAll); next(playerTable)
-  fuzzy_matches, max_fuzzy = fuzzy_matching(player_name, playerTable) # fuzzy lookup for best name-matching
+
+  # fuzzy lookup for best name-matching
+  fuzzy_matches, max_fuzzy = fuzzy_matching(player_name, playerTable) 
   if len(list(fuzzy_matches.keys())) > 0:
     for key in list(fuzzy_matches.keys()):
       fuzzy_score = round(fuzzy_matches[key]['fuzzy_score'][0], 3)
@@ -177,7 +202,8 @@ def single_player_scraper(player_name = None):
     playerName = max_fuzzy[1]
     playerURL = fuzzy_matches[playerName]['url'][0]
     print('Best match: {}'.format(max_fuzzy[1]))
-    df_player_meta, df_player_data = player_info_scraper(playerName, playerURL)
-    return df_player_meta, df_player_data
+
+    df_player_meta, df_player_data, df_player_gamelogs = player_info_scraper(playerName, playerURL)
+    return df_player_meta, df_player_data, df_player_gamelogs
   print('{} not found'.format(player_name))
-  return None, None # name missing from basketball-reference database
+  return None, None, None # name missing from basketball-reference database

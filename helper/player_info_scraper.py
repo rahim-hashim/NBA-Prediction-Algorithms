@@ -72,5 +72,5 @@ def player_info_scraper(playerName, playerURL):
         pass
   df_row = pd.DataFrame.from_dict(player_MetaHash)
   # Statistical Data    
-  df_player = player_table_scraper(playerName, soup)
-  return df_row, df_player
+  df_player, df_gamelogs = player_table_scraper(playerName, soup)
+  return df_row, df_player, df_gamelogs
