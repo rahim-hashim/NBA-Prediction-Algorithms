@@ -4,7 +4,7 @@ import pandas as pd
 from IPython.display import display
 from collections import defaultdict
 from bs4 import BeautifulSoup, Comment
-from game_log_scraper import game_log_scraper
+from helper.game_log_scraper import game_log_scraper
 
 INCLUDED_TABLES = ['pbp'] # for testing
 EXCLUDED_TABLES = ['highs-reg-season', 'sims-thru', 'adjooting'] # not included in final DataFrame
@@ -116,8 +116,11 @@ def player_table_scraper(playerName, playerSoup):
       continue
     else:
       gamelog_advanced_url = gamelog_url.replace('gamelog', 'gamelog-advanced')
-    gamelog_df = game_log_scraper(playerName, gamelog_url)
-    gamelogs_df = pd.concat([gamelogs_df,gamelog_df])
+    try:
+      gamelog_df = game_log_scraper(playerName, gamelog_url)
+      gamelogs_df = pd.concat([gamelogs_df,gamelog_df])
+    except:
+      pass # player missing gamelog tables
     #gamelog_adv_df = game_log_scraper(gamelog_advanced_url)
     #print(gamelog_adv_df)
 

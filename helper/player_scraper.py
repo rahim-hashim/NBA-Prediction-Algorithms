@@ -79,7 +79,7 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     list_players_data = []
     list_players_gamelogs = []
     urls_players = []
-    for letter in ascii_lowercase[:2]:
+    for letter in ascii_lowercase:
         url = PLAYERS_ROOT_URL + letter
         urls_players.append(url)
 
@@ -107,37 +107,39 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     end_time = time.time()
     print ('  Scraping complete')
     print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
+    return list_players_meta, list_players_data, list_players_gamelogs
+
+def concatenate_dfs(ROOT, list_players_meta, list_players_data, list_players_gamelogs):
     
-    # Concatenate all meta info and player data into two DataFrames
-    print ('  Concatenating DataFrames')
-    start_time = time.time()
-    df_players_meta = None
-    df_players_data = None
-    df_players_gamelogs = None
-    for (df_meta, df_data, df_log) in tqdm(list(zip(list_players_meta, list_players_data, list_players_gamelogs))):
-      df_players_meta = pd.concat([df_players_meta,df_meta])
-      df_players_data = pd.concat([df_players_data,df_data])
-      df_players_gamelogs = pd.concat([df_players_gamelogs,df_log])
-    end_time = time.time()
-    print ('  Concatenating complete')
-    print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
+  # Concatenate all meta info and player data into two DataFrames
+  print ('  Concatenating DataFrames')
+  start_time = time.time()
+  df_players_meta = None
+  df_players_data = None
+  df_players_gamelogs = None
+  for (df_meta, df_data, df_log) in tqdm(list(zip(list_players_meta, list_players_data, list_players_gamelogs))):
+    df_players_meta = pd.concat([df_players_meta,df_meta])
+    df_players_data = pd.concat([df_players_data,df_data])
+    df_players_gamelogs = pd.concat([df_players_gamelogs,df_log])
+  end_time = time.time()
+  print ('  Concatenating complete')
+  print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
 
-
-    print('Saving {}'.format(PLAYER_META_PICKLE))
-    print('  Path: {}'.format(SAVE_PATH+PLAYER_META_PICKLE))
-    df_players_meta.replace('NaN', np.nan, inplace=True)
-    df_players_meta.replace('', np.nan, inplace=True)
-    df_players_meta.to_pickle(SAVE_PATH+PLAYER_META_PICKLE)
-    print('Saving {}'.format(PLAYER_DATA_PICKLE))
-    print('  Path: {}'.format(SAVE_PATH+PLAYER_DATA_PICKLE))
-    df_players_data.replace('NaN', np.nan, inplace=True)
-    df_players_data.replace('', np.nan, inplace=True)
-    df_players_data.to_pickle(SAVE_PATH+PLAYER_DATA_PICKLE)
-    print('Saving {}'.format(PLAYER_GAMELOG_PICKLE))
-    print('  Path: {}'.format(SAVE_PATH+PLAYER_GAMELOG_PICKLE))
-    df_players_gamelogs.replace('NaN', np.nan, inplace=True)
-    df_players_gamelogs.replace('', np.nan, inplace=True)
-    df_players_gamelogs.to_pickle(SAVE_PATH+PLAYER_GAMELOG_PICKLE)
+  print('Saving {}'.format(PLAYER_META_PICKLE))
+  print('  Path: {}'.format(SAVE_PATH+PLAYER_META_PICKLE))
+  df_players_meta.replace('NaN', np.nan, inplace=True)
+  df_players_meta.replace('', np.nan, inplace=True)
+  df_players_meta.to_pickle(SAVE_PATH+PLAYER_META_PICKLE)
+  print('Saving {}'.format(PLAYER_DATA_PICKLE))
+  print('  Path: {}'.format(SAVE_PATH+PLAYER_DATA_PICKLE))
+  df_players_data.replace('NaN', np.nan, inplace=True)
+  df_players_data.replace('', np.nan, inplace=True)
+  df_players_data.to_pickle(SAVE_PATH+PLAYER_DATA_PICKLE)
+  print('Saving {}'.format(PLAYER_GAMELOG_PICKLE))
+  print('  Path: {}'.format(SAVE_PATH+PLAYER_GAMELOG_PICKLE))
+  df_players_gamelogs.replace('NaN', np.nan, inplace=True)
+  df_players_gamelogs.replace('', np.nan, inplace=True)
+  df_players_gamelogs.to_pickle(SAVE_PATH+PLAYER_GAMELOG_PICKLE)
 
   print('  Size (meta info): {}'.format(sizeof_fmt(sys.getsizeof(df_players_meta))))
   print('  Size (player data): {}'.format(sizeof_fmt(sys.getsizeof(df_players_data))))
