@@ -23,6 +23,15 @@ PLAYER_META_PICKLE = 'players_df_meta.pkl'
 PLAYER_DATA_PICKLE = 'players_df_data.pkl'
 PLAYER_GAMELOG_PICKLE = 'players_df_gamelogs.pkl'
 
+def pickle_dump(pickle_object, pickle_name):
+  with open(pickle_name, 'wb') as f:
+    pickle.dump(pickle_object, f)
+
+def pickle_load(pickle_name):
+  with open(pickle_name, 'rb') as f:
+    pickle_object = pickle.load(f)
+    return pickle_object
+
 def sizeof_fmt(num):
   '''Calculates size of pickled files'''
   for unit in [' ','KB','MB','GB','TB','PB','EB','ZB']:
@@ -46,6 +55,7 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     Returns:
       df_players_meta: meta-info on all players in database
       df_players_data: statistics on all players in database
+      df_players_gamelogs: gamelogs of all players in database
   '''
 
   SAVE_PATH = ROOT + 'data/'
@@ -110,40 +120,46 @@ def scrape_all_players(ROOT, THREAD_FLAG=True):
     return list_players_meta, list_players_data, list_players_gamelogs
 
 def concatenate_dfs(ROOT, list_players_meta, list_players_data, list_players_gamelogs):
-    
-  # Concatenate all meta info and player data into two DataFrames
+  
+  SAVE_PATH = ROOT + '/data/'
+  # Search for data folder
+  if not os.path.exists(SAVE_PATH):
+    os.makedirs(SAVE_PATH)
+
+  # Concatenate all meta info and player data into three DataFrames
   print ('  Concatenating DataFrames')
   start_time = time.time()
-  df_players_meta = None
-  df_players_data = None
-  df_players_gamelogs = None
-  for (df_meta, df_data, df_log) in tqdm(list(zip(list_players_meta, list_players_data, list_players_gamelogs))):
-    df_players_meta = pd.concat([df_players_meta,df_meta])
-    df_players_data = pd.concat([df_players_data,df_data])
-    df_players_gamelogs = pd.concat([df_players_gamelogs,df_log])
+  df_players_meta = pd.concat(list_players_meta)
+  df_players_data = pd.concat(list_players_data)
+  df_players_gamelogs = pd.concat(list_players_gamelogs)
   end_time = time.time()
   print ('  Concatenating complete')
   print ('  Run Time: {} min'.format(str((end_time - start_time)/60)[:6]))
 
+  # Player Metadata
   print('Saving {}'.format(PLAYER_META_PICKLE))
   print('  Path: {}'.format(SAVE_PATH+PLAYER_META_PICKLE))
   df_players_meta.replace('NaN', np.nan, inplace=True)
   df_players_meta.replace('', np.nan, inplace=True)
-  df_players_meta.to_pickle(SAVE_PATH+PLAYER_META_PICKLE)
+  pickle_dump(df_players_meta, SAVE_PATH+PLAYER_META_PICKLE)
+  print('  Size (meta info): {}'.format(sizeof_fmt(sys.getsizeof(df_players_meta))))
+
+  # Player Statistics
   print('Saving {}'.format(PLAYER_DATA_PICKLE))
   print('  Path: {}'.format(SAVE_PATH+PLAYER_DATA_PICKLE))
   df_players_data.replace('NaN', np.nan, inplace=True)
   df_players_data.replace('', np.nan, inplace=True)
-  df_players_data.to_pickle(SAVE_PATH+PLAYER_DATA_PICKLE)
+  pickle_dump(df_players_data, SAVE_PATH+PLAYER_DATA_PICKLE)
+  print('  Size (player data): {}'.format(sizeof_fmt(sys.getsizeof(df_players_data))))
+
+  # Gamelogs
   print('Saving {}'.format(PLAYER_GAMELOG_PICKLE))
   print('  Path: {}'.format(SAVE_PATH+PLAYER_GAMELOG_PICKLE))
   df_players_gamelogs.replace('NaN', np.nan, inplace=True)
   df_players_gamelogs.replace('', np.nan, inplace=True)
-  df_players_gamelogs.to_pickle(SAVE_PATH+PLAYER_GAMELOG_PICKLE)
-
-  print('  Size (meta info): {}'.format(sizeof_fmt(sys.getsizeof(df_players_meta))))
-  print('  Size (player data): {}'.format(sizeof_fmt(sys.getsizeof(df_players_data))))
+  pickle_dump(df_players_gamelogs, SAVE_PATH+PLAYER_GAMELOG_PICKLE)
   print('  Size (player data): {}'.format(sizeof_fmt(sys.getsizeof(df_players_gamelogs))))
+
   print('Complete.')
 
   # Return Players DataFrame   
@@ -181,6 +197,7 @@ def single_player_scraper(player_name = None):
     Returns:
       df_players_meta: meta-info on single player (if exists)
       df_players_data: statistics on single player (if exists)
+      df_players_gamelogs: gamelogs of single player (if exists)
   '''
   if player_name == None:
     player_name = input('Player Name: ')
