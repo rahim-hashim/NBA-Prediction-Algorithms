@@ -41,7 +41,7 @@ Follow the [Hitchhiker's guide to python](https://docs.python-guide.org/dev/virt
 
 * [tqdm documentation](https://github.com/tqdm/tqdm)
 
-# Examples
+# Scraping
 
 ### Single Player Function Calls
 
@@ -63,13 +63,26 @@ Follow the [Hitchhiker's guide to python](https://docs.python-guide.org/dev/virt
 
 ### Entire Database Scraping Calls
 
-`list_players_meta, list_players_data, list_players_gamelogs = scrape_all_players(ROOT, THREAD_FLAG=True)`
+Only needs to be completed once.
 
-### Save Database
+```python
+ROOT = <set/path/to/repo>
+df_players_meta, df_players_data, df_players_gamelogs = main(ROOT)
+```
 
-`df_players_meta, df_players_data, df_players_gamelogs = concatenate_dfs(ROOT, list_players_meta, list_players_data, list_players_gamelogs)`
+After scraping, you can access the data by unpickling the DataFrames
 
-##### **Filter for Largest Recorded Players**
+```python
+players_df_meta = pickle_load(DATA_PATH+'players_df_meta.pkl')
+
+players_df_data = pickle_load(DATA_PATH+'players_df_data.pkl')
+
+players_df_gamelogs = pickle_load(DATA_PATH+'players_df_gamelogs.pkl')
+```
+
+# Example Analyses
+
+### Biodata — Filter for Largest Recorded Players
 
 ```python
 # Player Meta Query
@@ -78,6 +91,35 @@ df_large = df_players_meta.loc[(df_players_meta['height']>80) &
 
 df_large = df_large.dropna(how='all', axis='columns') # drops all columns that are empty
 display(df_large[df_large['weight'] == df_large['weight'].max()])
+```
+
+### Season Data — Find Specific Game Stat Maxes
+
+Select any of the following data types for different table fields: 
+
+* Per Game (per_game)
+* Totals (totals)
+* Advanced
+* Per Minute
+* Per Possession
+* Adjusted Shooting
+* Play-By-Play
+* Shooting
+* All-Star
+* Salaries
+
+The following is a an example to filter for *Per Game* statistics:
+
+```python
+table_selected = players_df_data[players_df_data['data_type'] == 'per_game']
+
+table_selected[table_selected['pts_per_g'] == np.nanmax(table_selected['pts_per_g'])]
+```
+
+### Gamelogs — Find Specific Game Stat Maxes
+
+```python
+players_df_gamelogs[players_df_gamelogs['pts']==np.nanmax(players_df_gamelogs['pts'])]
 ```
 
 # Acknowledgements
