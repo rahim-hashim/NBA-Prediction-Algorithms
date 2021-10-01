@@ -37,7 +37,8 @@ teamDict = {
         'SAS':	'San Antonio Spurs',
         'TOR':	'Toronto Raptors',
         'UTA':	'Utah Jazz',
-        'WAS':	'Washington Wizards'}
+        'WAS':	'Washington Wizards'
+}
 
 coversNames = {
         'BN' : 'BRK',

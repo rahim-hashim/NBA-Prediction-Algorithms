@@ -5,6 +5,7 @@
 # with Rahim Hashim.
 
 import re
+import sys
 import requests
 from bs4 import BeautifulSoup
 from string import ascii_lowercase
@@ -146,7 +147,7 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
                                         records[away_conf][date][away]['tie']
     return games, new_meta
 
-def scrape():
+def scrape(start_year, end_year):
 
     # List of games, each game is a dictionary object
     # List of meta information to avoid multiple additions
@@ -168,8 +169,6 @@ def scrape():
     #    end_year = int(end_year_input)
     #except:
     #    sys.exit('Invalid Year')
-    start_year = 2015
-    end_year = 2016
     specs = 'R'
     #specs = input('\nScrape Regular Season (R), Playoff Games (P), or both (B): (default R)')
     #specs= 'R' if specs== '' else specs
@@ -195,8 +194,3 @@ def scrape():
 
             games = games + add_games; meta = meta + add_meta
     return games
-
-
-
-
-
