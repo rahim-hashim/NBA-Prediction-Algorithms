@@ -20,10 +20,10 @@ def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n
     return zip_longest(*args, fillvalue=fillvalue)
 
-def getDate(text, ref_date, year):
+def getDate(text, ref_date, year, is_end_year):
     date = datetime.strptime(text + ' 2000', '%b %d %Y') # This is for leap year
     #date = date.replace(year=year)
-    if date < ref_date:
+    if is_end_year:
         date = date.replace(year=(year + 1))
     else:
         date = date.replace(year = year)
@@ -80,7 +80,8 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
     soup = BeautifulSoup(response.text, 'html.parser')
 
     games = []; new_meta = []
-    ref_date = datetime(2000, 8, 1)
+    ref_date = datetime(year+1, 1, 1)
+    bool_in_end_year = True
 
     # Always have the spread for the Home team, against the spread
     # Do not include Over Under for now
@@ -121,7 +122,10 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
 		# Initialize game dictionary
                 game = dict.fromkeys(keys)
 		# Scrape Date
-                date = getDate(entry[0].text.strip(), ref_date, year)
+                date = getDate(entry[0].text.strip(), ref_date, year, bool_in_end_year)
+                if (bool_in_end_year and date.month == 12):
+                    bool_in_end_year = False
+                    date = date.replace(year = year)
                 game['Date'] = date
 		# Scrape Home Team and Away Team
                 covers_home, covers_away = getHomeAway(entry[1].text.strip(), TEAM_NAME)
