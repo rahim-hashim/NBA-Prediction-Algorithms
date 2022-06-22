@@ -21,10 +21,10 @@ def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n
     return zip_longest(*args, fillvalue=fillvalue)
 
-def getDate(text, ref_date, year):
+def getDate(text, ref_date, year, is_end_year):
     date = datetime.strptime(text + ' 2000', '%b %d %Y') # This is for leap year
     #date = date.replace(year=year)
-    if date < ref_date:
+    if is_end_year:
         date = date.replace(year=(year + 1))
     else:
         date = date.replace(year = year)
@@ -50,12 +50,20 @@ def getScore(text, isHome):
     return home_score, away_score, OT
 
 def getSpread(text, isHome):
+    if(text == '-'):
+        return float("nan")
     ATS = ['L', 'W', 'P']
     for ats in ATS:
         text = text.replace(ats, "").strip()
     return (isHome*2 - 1) * float(text)
 
-def getConferenceHelper(team_full, conf_list):
+def getConferenceHelper(team_full, conf_list, year):
+    if(year < 2014 and team_full == 'Charlotte Hornets'):
+        team_full = 'Charlotte Bobcats'
+    if(year < 2012 and team_full == 'Brooklyn Nets'):
+        team_full = 'New Jersey Nets'
+    if(year < 2013 and team_full == 'New Orleans Pelicans'):
+        team_full = 'New Orleans Hornets'
     team_conf = 'eastern' if team_full in conf_list['eastern'] else ""
     if(not team_conf):
         team_conf = 'western' if team_full in conf_list['western'] else ""
@@ -64,15 +72,28 @@ def getConferenceHelper(team_full, conf_list):
                    team_full)
     return team_conf
 
-def getConference(home, away, conf_list):
+def getConference(home, away, conf_list, year):
     home_full = teamDict[home]; away_full = teamDict[away]
-    home_conf = getConferenceHelper(home_full, conf_list)
-    away_conf = getConferenceHelper(away_full, conf_list)
+    home_conf = getConferenceHelper(home_full, conf_list, year)
+    away_conf = getConferenceHelper(away_full, conf_list, year)
     return home_conf, away_conf
 
-def standardize_names(home, away):
+def standardize_names(home, away, year):
     home_name = home if home not in coversNames.keys() else coversNames[home]
     away_name = away if away not in coversNames.keys() else coversNames[away]
+    if(year < 2014 and home_name == 'CHO'):
+        home_name = 'CHA'
+    elif(year< 2014 and away_name == 'CHO'):
+        away_name = 'CHA'
+    if(year < 2012 and home_name == 'BRK'):
+        home_name = 'NJN'
+    elif(year < 2012 and away_name == 'BRK'):
+        away_name = 'NJN'
+    if(year < 2013 and home_name == 'NOP'):
+        home_name = 'NOH'
+    elif(year < 2013 and away_name == 'NOP'):
+        away_name = 'NOH'
+
     return home_name, away_name
 
 def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_list, meta_list):
@@ -81,7 +102,8 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
     soup = BeautifulSoup(response.text, 'html.parser')
 
     games = []; new_meta = []
-    ref_date = datetime(2000, 8, 1)
+    ref_date = datetime(year+1, 1, 1)
+    bool_in_end_year = True
 
     # Always have the spread for the Home team, against the spread
     # Do not include Over Under for now
@@ -104,7 +126,7 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
     
     tables = soup.find_all('table')
     table_ind = 0
-    
+
     for table in tables:
         ### Skip the process if table is not included in game type (reg season or playoffs)
         ### Pick the past results page tables for playoffs and reg season
@@ -122,11 +144,14 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
 		# Initialize game dictionary
                 game = dict.fromkeys(keys)
 		# Scrape Date
-                date = getDate(entry[0].text.strip(), ref_date, year)
+                date = getDate(entry[0].text.strip(), ref_date, year, bool_in_end_year)
+                if (bool_in_end_year and date.month == 12):
+                    bool_in_end_year = False
+                    date = date.replace(year = year)
                 game['Date'] = date
 		# Scrape Home Team and Away Team
                 covers_home, covers_away = getHomeAway(entry[1].text.strip(), TEAM_NAME)
-                home, away = standardize_names(covers_home, covers_away)
+                home, away = standardize_names(covers_home, covers_away, year)
                 game['Home_Team'] = home; game['Away_Team'] = away
 		# Scrape Scores and OT info
                 home_score, away_score, OT = getScore(entry[2].text.strip(),
@@ -139,7 +164,7 @@ def bettingLinesScraper(team_url, team_name, year, season_specs, records, conf_l
                 if game_meta not in meta_list:
                     games.append(game); new_meta.append(game_meta)
         # Scrape Record
-                home_conf, away_conf = getConference(home, away, conf_list)
+                home_conf, away_conf = getConference(home, away, conf_list, year)
                 game['Home_Record'] = records[home_conf][date][home]['record']
                 game['Away_Record'] = records[away_conf][date][away]['record']
                 game['Home_Standing'] = str(records[home_conf][date][home]['standing']) + \
@@ -183,6 +208,9 @@ def scrape(start_year, end_year):
         print('Getting conference lists ...')
         conference_list = getConferences(year+1)
         for team_abbr in t:
+            if(teamDict[team_abbr] not in conference_list['eastern'] and
+                teamDict[team_abbr] not in conference_list['western']):
+                continue
             t.set_description(team_abbr)
             t.refresh()
             team_name = teamDict[team_abbr].lower()
