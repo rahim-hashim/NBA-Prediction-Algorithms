@@ -11,10 +11,10 @@ from bs4 import BeautifulSoup
 from string import ascii_lowercase
 from collections import defaultdict
 from itertools import zip_longest
-from TeamNames import teamDict
-from tqdm.notebook import trange, tqdm
+from tqdm.auto import trange, tqdm
 from datetime import datetime
 
+from TeamNames import teamDict
 
 ### LOGIC
 

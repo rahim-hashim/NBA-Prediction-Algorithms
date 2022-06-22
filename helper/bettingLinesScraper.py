@@ -1,7 +1,7 @@
 # bettingLinesScraper.py
 # Aunoy Poddar
 # 6_30_2020
-# Scraping the betting lines from cover.com for NBA Predictions
+# Scraping the betting lines from covers.com for NBA Predictions
 # with Rahim Hashim.
 
 import re
@@ -11,10 +11,11 @@ from bs4 import BeautifulSoup
 from string import ascii_lowercase
 from collections import defaultdict
 from itertools import zip_longest
-from TeamNames import teamDict, coversNames
-from tqdm.notebook import trange, tqdm
+from tqdm.auto import trange, tqdm
 from datetime import datetime
-from recordDateScraper import buildTable, getConferences
+
+from helper.TeamNames import teamDict, coversNames
+from helper.recordDateScraper import buildTable, getConferences
 
 def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n

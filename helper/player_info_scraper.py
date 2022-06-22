@@ -5,8 +5,8 @@ import pandas as pd
 from bs4 import BeautifulSoup
 from string import ascii_lowercase
 from collections import defaultdict
-from helper.Regions import stateDict
-from helper.player_table_scraper import player_table_scraper
+from Regions import stateDict
+from player_table_scraper import player_table_scraper
 
 def player_info_scraper(playerName, playerURL):
   '''Scrapes data from each player's specific URL page

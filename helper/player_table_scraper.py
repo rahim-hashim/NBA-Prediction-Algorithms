@@ -4,8 +4,8 @@ import pandas as pd
 from IPython.display import display
 from collections import defaultdict
 from bs4 import BeautifulSoup, Comment
-from helper.game_log_scraper import game_log_scraper
-from helper.parse_tools import num_convert, data_type_parse
+from game_log_scraper import game_log_scraper
+from parse_tools import num_convert, data_type_parse
 
 
 INCLUDED_TABLES = ['pbp'] # for testing
