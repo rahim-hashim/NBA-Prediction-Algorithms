@@ -51,7 +51,8 @@ def levenshtein_ratio_and_distance(s, t, ratio_calc = False):
     # This is the minimum number of edits needed to convert string a to string b
     return "The strings are {} edits away".format(distance[row][col])
 
-def fuzzy_matching(player_name, playerTable):
+def fuzzy_matching_html(player_name, playerTable):
+  '''Fuzzy matching for players while requesting from html'''
   FUZZY_THRESHOLD = 0.7
   fuzzy_matches = defaultdict(lambda: defaultdict(list))
   max_fuzzy = [0, None]  # [score, name]
@@ -77,3 +78,27 @@ def fuzzy_matching(player_name, playerTable):
     return playerName, playerURL
   else:
     return '', ''
+
+def fuzzy_matching_df(player_name, all_players_list):
+  '''Fuzzy matching for players after players_df has been created'''
+  print('  Fuzzy matching: {}...'.format(player_name))
+  FUZZY_THRESHOLD = 0.7
+  fuzzy_matches = defaultdict(lambda: defaultdict(list))
+  max_fuzzy = [0, None]  # [score, name]
+  for index, row_player_name in enumerate(all_players_list):
+    fuzzy_ratio = levenshtein_ratio_and_distance(player_name.lower(), row_player_name.lower(), ratio_calc=True)
+    if fuzzy_ratio > max_fuzzy[0]:
+      max_fuzzy = [fuzzy_ratio, row_player_name]
+    if fuzzy_ratio > FUZZY_THRESHOLD:
+      fuzzy_matches[row_player_name]['fuzzy_score'].append(fuzzy_ratio)
+    else:
+      continue
+  if len(list(fuzzy_matches.keys())) > 0:
+    for key in list(fuzzy_matches.keys()):
+      fuzzy_score = round(fuzzy_matches[key]['fuzzy_score'][0], 3)
+      print('    {} (match score={})'.format(key, str(fuzzy_score)))
+    playerName = max_fuzzy[1]
+    print('  Best match: {}'.format(max_fuzzy[1]))
+    return playerName
+  else:
+    return ''

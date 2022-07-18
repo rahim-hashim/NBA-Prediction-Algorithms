@@ -24,15 +24,6 @@ def check_dnp(header, statData):
 		statData = statData + ['']
 	return statData
 
-def replace_win(row):
-	'''Places 1 for win, 0 for loss, and NaN for DNP'''
-	if row['win'][0] == 'W':
-		return 1
-	elif row['win'][0] == 'L':
-		return 0
-	else:
-		return np.nan
-
 def gamelog_season(df_season, playerName, header, season, table):
 	table_rows = table.find_all('tr')
 	rk = 0 # counting game number (i.e. not blank rows)
@@ -79,8 +70,8 @@ def gamelog_playoffs(df_playoffs, playerName, header, season, comment):
 		return df_playoffs
 	return None
 
-def game_log_scraper(playerName, gamelog):
-	page = requests.get(gamelog)
+def lineup_scraper(playerName, lineup_url):
+	page = requests.get(lineup_url)
 	soup = BeautifulSoup(page.content, 'html.parser')
 	season_title = soup.find('h1').text
 	pattern = r'\d[0-9\-]*'
@@ -119,8 +110,5 @@ def game_log_scraper(playerName, gamelog):
 		df = pd.concat([df_season, df_playoffs], ignore_index=True)
 	else:
 		df = df_season
-
-	# Add win (1) loss (0) field parsing from 'win' column
-	df['win_loss'] = df.apply(replace_win, axis=1)
 
 	return df 

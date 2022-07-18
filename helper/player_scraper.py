@@ -15,7 +15,7 @@ from string import ascii_lowercase
 from collections import defaultdict
 
 # Custom Functions
-from fuzzy_lookup import fuzzy_matching
+from fuzzy_lookup import fuzzy_matching_html
 from meta_info_scraper import meta_info_scraper
 from player_info_scraper import player_info_scraper
 
@@ -221,11 +221,11 @@ def single_player_scraper(player_name=None):
   letter_response = requests.get(letter_url)
   letter_soup = BeautifulSoup(letter_response.text, 'html.parser')
   playerTableAll = letter_soup.find_all('tr')
-  playerTable = iter(playerTableAll);
+  playerTable = iter(playerTableAll)
   next(playerTable)
 
   # fuzzy lookup for best name-matching
-  playerName, playerURL = fuzzy_matching(player_name, playerTable)
+  playerName, playerURL = fuzzy_matching_html(player_name, playerTable)
   if playerName:
     df_player_meta, df_player_data, df_player_gamelogs = player_info_scraper(playerName, playerURL)
     return df_player_meta, df_player_data, df_player_gamelogs

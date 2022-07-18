@@ -5,6 +5,7 @@ from IPython.display import display
 from collections import defaultdict
 from bs4 import BeautifulSoup, Comment
 from game_log_scraper import game_log_scraper
+from lineup_scraper import lineup_scraper
 from parse_tools import num_convert, data_type_parse
 
 
@@ -27,9 +28,12 @@ def row_scraper(playerName, tag_soup, tag, statHashList):
   if 'playoffs' in data_type:
     season_playoffs = 'playoffs'
     data_type = data_type.replace('playoffs_', '') # remove playoffs_
+  
+  # If the table has rows
   if rows:
     if data_type in EXCLUDED_TABLES or data_type == '':# or data_type not in INCLUDED_TABLES:
       return statHashList # exclude tables
+    # Iterates through all rows of table
     for index, row in enumerate(rows):
       statHash = defaultdict(dict)
       if index == 0: # table header
@@ -72,6 +76,7 @@ def row_scraper(playerName, tag_soup, tag, statHashList):
         if 'DUMMY' in df_row.columns:
           df_row = df_row.drop(['DUMMY'], axis=1)
         statHashList.append(df_row)
+  # The table has no rows (empty)
   else:
     pass
   return statHashList
@@ -90,7 +95,8 @@ def player_table_scraper(playerName, playerSoup):
   page, the location of the data is the same, with the only key differences being 
   the tables tag (statTag) and column names for each (statType).
   '''
-  #with open('soup.txt', mode='wt') as file:
+  # Print soup (for debugging)
+  # with open('soup.txt', mode='wt') as file:
   #  file.write(str(playerSoup))
   statHashList = []
 
@@ -105,25 +111,33 @@ def player_table_scraper(playerName, playerSoup):
       comment_soup = BeautifulSoup(comment, 'html.parser')
       statHashList = row_scraper(playerName, comment_soup, 'comment', statHashList)
 
-  # Gamelogs
-  links = playerSoup.find_all('a', href=True) # pull all links from player page
-  gamelogs = np.unique(np.array([link['href'] for link in links if 'gamelog' in str(link)]))
 
+  links = playerSoup.find_all('a', href=True) # pull all links from player page
+
+  # Gamelogs Scraper
+  gamelogs = np.unique(np.array([link['href'] for link in links if 'gamelog' in str(link)]))
   gamelogs_df = pd.DataFrame()
   for gamelog in gamelogs:
     gamelog_url = WEBSITE_URL + gamelog
     #gamelog_advanced_url = gamelog_url.replace('gamelog', 'gamelog-advanced')
-    if 'playoffs' in gamelog_url: # playoff gamelogs will be captured by individual season gamelog scraper
-      continue
-    else:
+    if 'playoffs' not in gamelog_url: # playoff gamelogs will be captured by individual season gamelog scraper
       try:
         gamelog_df = game_log_scraper(playerName, gamelog_url)
         gamelogs_df = pd.concat([gamelogs_df,gamelog_df])
       except:
         pass # unique situations where gamelogs are listed on player page but the table doesn't exist
 
-  #lineups = np.unique(np.array([link['href'] for link in links if 'lineups' in str(link)]))
-
+  # Lineups Scraper
+  lineups = np.unique(np.array([link['href'] for link in links if 'lineups' in str(link)]))
+  lineups_df = pd.DataFrame()
+  for lineup in lineups:
+    lineup_url = WEBSITE_URL + lineup
+    if 'playoffs' not in lineup_url:
+      try:
+        lineup_df = lineup_scraper(playerName, lineup_url)
+        lineups_df = pd.concat([lineups_df,lineup_df])
+      except:
+        pass
 
   df_player = pd.concat(statHashList, ignore_index=True)
   return df_player, gamelogs_df

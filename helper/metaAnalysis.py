@@ -5,7 +5,15 @@ from collections import defaultdict, Counter, OrderedDict
 
 from Regions import stateDict #stateDict is a Dictionary to help with geography-based analyses
 
-def metaPlot(players_df_meta):
+def metaPlot(players_df_meta) -> None:
+	'''Plot the meta data (height, weight, etc) of all players.
+	
+	Args:
+		players_df_meta: Dataframe of all players' meta data.
+
+	Returns:
+		None
+	'''
 	
 	height_list = players_df_meta['height'].tolist()
 	weight_list = players_df_meta['weight'].tolist()
