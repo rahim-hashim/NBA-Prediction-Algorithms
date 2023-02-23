@@ -9,9 +9,9 @@ import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
 from matplotlib.patches import Rectangle, Patch
 
-from fuzzy_lookup import fuzzy_matching_df
-from stat_info import STAT_LIST, stat_dict, stat_precision, stat_range
-from plot_helper.plot_matchups import plot_matchups_box, plot_matchups_hist
+from helper.fuzzy_lookup import fuzzy_matching_df
+from helper.stat_info import STAT_LIST, stat_dict, stat_precision, stat_range
+from helper.plot_helper.plot_matchups import plot_matchups_box, plot_matchups_hist
 pd.options.mode.chained_assignment = None  # default='warn'
 
 def matchup_game_finder(
@@ -67,7 +67,10 @@ def matchup_game_finder(
 				# Drop date from original gamelogs
 				player_gamelogs = player_gamelogs[player_gamelogs['date']!=game_date]
 		df_overlap.loc[:,'matchup'] = player2
-		plot_matchups_box(player_gamelogs, df_overlap, teammates)
+		if len(df_overlap) > 0:
+			plot_matchups_box(player_gamelogs, df_overlap, teammates)
+		else:
+			sys.exit('No games found.')
 	else:
 		print('No games found.')
 	return df_overlap

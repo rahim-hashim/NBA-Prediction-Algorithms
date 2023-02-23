@@ -44,6 +44,7 @@ players_df_gamelogs['win_loss'] = players_df_gamelogs.apply(replace_win, axis=1)
 from player_matchup import matchup_game_finder
 print(players_df_gamelogs.columns)
 
-player1 = 'Stephen Curry'
-player2 = 'Draymond Green'
-matchup_game_finder(players_df_gamelogs, player1, player2, teammates=True, exact_match=True)
+player1 = 'Steve Nash'
+player2 = 'Kobe Bryant'
+matchup_game_finder(players_df_gamelogs, player1, player2, 
+									  teammates=False, exact_match=True)

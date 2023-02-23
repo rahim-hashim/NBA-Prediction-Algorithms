@@ -11,7 +11,7 @@ import pickle as pickle
 from timeit import timeit
 from bs4 import BeautifulSoup, Comment
 from collections import defaultdict
-from parse_tools import data_type_parse, num_convert 
+from helper.parse_tools import data_type_parse, num_convert 
 
 def check_dnp(header, statData):
 	if len(statData) < 6: # empty row

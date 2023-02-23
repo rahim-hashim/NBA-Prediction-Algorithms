@@ -15,9 +15,9 @@ from string import ascii_lowercase
 from collections import defaultdict
 
 # Custom Functions
-from fuzzy_lookup import fuzzy_matching_html
-from meta_info_scraper import meta_info_scraper
-from player_info_scraper import player_info_scraper
+from helper.fuzzy_lookup import fuzzy_matching_html
+from helper.meta_info_scraper import meta_info_scraper
+from helper.player_info_scraper import player_info_scraper
 
 WEBSITE_URL = 'https://www.basketball-reference.com'
 PLAYERS_ROOT_URL: str = WEBSITE_URL + '/players/'

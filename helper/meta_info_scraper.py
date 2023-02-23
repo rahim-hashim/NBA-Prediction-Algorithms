@@ -3,7 +3,7 @@ import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from collections import defaultdict
-from player_info_scraper import player_info_scraper
+from helper.player_info_scraper import player_info_scraper
 
 def meta_info_scraper(url, list_players_meta, list_players_data, list_players_gamelogs):
   meta_hash = defaultdict(list)
